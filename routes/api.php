@@ -19,3 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::resource("movie", MovieController::class)->only(['index', 'show']);
+Route::resource("review", ReviewController::class)->only(['index', 'show', 'store']);
