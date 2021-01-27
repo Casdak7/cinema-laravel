@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Review;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ReviewController extends Controller
 {
@@ -14,7 +16,11 @@ class ReviewController extends Controller
      */
     public function index()
     {
-        $reviews = Review::all();
+        try{
+            $reviews = Review::all();
+        } catch(Exception $e){
+            return response($e, 500);
+        }
 
         return response(json_encode($reviews), 200);
     }
@@ -27,9 +33,25 @@ class ReviewController extends Controller
      */
     public function store(Request $request)
     {
-        $review = Review::create($request->all());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:255',
+            'message' => 'required',
+            'rating' => 'numeric|between:0,10',
+            'movie_id' => 'required|numeric',
+        ]);
 
-        return response(json_encode($review), 200);
+        if ($validator->fails()) {
+            return response(json_encode($validator->errors()), 400);
+        }
+
+        try{
+            $review = Review::create($request->all());
+        } catch(Exception $e){
+            return response(json_encode($e), 500);
+        }
+
+
+        return response(json_encode($review), 201);
     }
 
     /**
@@ -39,8 +61,12 @@ class ReviewController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        $review = Review::find($id);
+    {       
+        try{
+            $review = Review::find($id);
+        } catch(Exception $e){
+            return response($e, 500);
+        }
 
         return response(json_encode($review), 200);
     }
